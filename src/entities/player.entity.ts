@@ -1,4 +1,8 @@
+// Prisma enums
 import { Region } from '@prisma/client';
+
+// Contracts
+import { PlayerConstructor } from './contracts';
 
 export class Player {
   private _id: string;
@@ -6,12 +10,7 @@ export class Player {
   private _region: Region | null | undefined;
   private _email: string | null | undefined;
 
-  constructor(
-    id: string,
-    username: string,
-    email?: string | null | undefined,
-    region?: Region | null | undefined
-  ) {
+  constructor({ id, username, email, region }: PlayerConstructor) {
     this._id = id;
     this._username = username;
     this._email = email;
