@@ -1,0 +1,82 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TourType {
+  SINGLE
+  TEAM
+}
+
+enum TourCheckIn {
+  CHECKED
+  NOT_CHECKED
+}
+
+enum Region {
+  EU
+  USE
+  USW
+  AUS
+}
+
+model Tournament {
+  id String @id @default(uuid())
+  guildId String
+  name String 
+  maxParticipants Int
+  role String
+  type TourType
+  startDate DateTime?
+  registrationEndDate DateTime? 
+  channelCategoryId String?
+  registrationChannelId String?
+  informationChannelId String?
+  commandChannelId String?
+  brackets String?
+  stream String?
+  prizepool String? @db.Text
+  details String? @db.Text
+  rules String? @db.Text
+  seasonId String?
+  buyIn Boolean
+  deletedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime? @updatedAt
+
+  // Relations
+  singlePlayers TournamentPlayer[]
+}
+
+model TournamentPlayer {
+  playerId String
+  tourId String
+  checkIn TourCheckIn @default(NOT_CHECKED)
+  buyIn Boolean?
+
+  // Relations
+  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  tournament Tournament @relation(fields: [tourId], references: [id], onDelete: Cascade)
+
+   @@unique([playerId, tourId])
+}
+
+model Player {
+  id String @id
+  username String
+  email String?
+  region Region?
+  deletedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime? @updatedAt
+
+  // Relations
+  tournaments TournamentPlayer[]
+}
