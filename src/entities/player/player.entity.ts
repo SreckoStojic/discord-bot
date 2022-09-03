@@ -2,7 +2,7 @@
 import { Region } from '@prisma/client';
 
 // Contracts
-import { PlayerConstructor } from './contracts';
+import { PlayerConstructor } from './contracts/player.types';
 
 export class Player {
   private _id: string;

@@ -2,7 +2,7 @@
 import { CacheType, Interaction } from 'discord.js';
 
 // Entities
-import { Player } from '../entities';
+import { Player } from '../entities/player/player.entity';
 
 // Actions
 import { replyMessage, roll } from './commands.actions';
@@ -15,6 +15,10 @@ import { Region } from '@prisma/client';
 
 // Utils
 import { getRandomNumber, isAction } from '../utils';
+import {
+  createPlayer,
+  findOne,
+} from '../entities/player/repository/player.repository';
 
 export const interactionCreate = async (
   interaction: Interaction<CacheType>
@@ -46,7 +50,7 @@ export const interactionCreate = async (
     const { id, username } = interaction.user;
     const email = interaction.options.get('email')?.value;
     const region = interaction.options.get('region')?.value;
-    const player = new Player({
+    const player = await createPlayer({
       id,
       username,
       email: email ? (email as string) : null,

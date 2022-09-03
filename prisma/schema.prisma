@@ -3,6 +3,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  previewFeatures=["interactiveTransactions"]
 }
 
 datasource db {
@@ -28,36 +29,40 @@ enum Region {
 }
 
 model Tournament {
-  id String @id @default(uuid())
-  guildId String
+  id BigInt @id
+  guildId BigInt
   name String 
   maxParticipants Int
   role String
   type TourType
   startDate DateTime?
   registrationEndDate DateTime? 
-  channelCategoryId String?
-  registrationChannelId String?
-  informationChannelId String?
-  commandChannelId String?
+  channelCategoryId BigInt?
+  registrationChannelId BigInt?
+  informationChannelId BigInt?
+  commandChannelId BigInt?
   brackets String?
   stream String?
   prizepool String? @db.Text
   details String? @db.Text
   rules String? @db.Text
-  seasonId String?
+  seasonId BigInt?
   buyIn Boolean
   deletedAt DateTime?
   createdAt DateTime @default(now())
   updatedAt DateTime? @updatedAt
 
   // Relations
+  tourTeams TourTeam[]
   singlePlayers TournamentPlayer[]
+  guild Guild @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  season Season? @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+
 }
 
 model TournamentPlayer {
-  playerId String
-  tourId String
+  playerId BigInt
+  tourId BigInt
   checkIn TourCheckIn @default(NOT_CHECKED)
   buyIn Boolean?
 
@@ -69,7 +74,7 @@ model TournamentPlayer {
 }
 
 model Player {
-  id String @id
+  id BigInt @id
   username String
   email String?
   region Region?
@@ -78,5 +83,89 @@ model Player {
   updatedAt DateTime? @updatedAt
 
   // Relations
+  tourTeamPlayers TourTeamPlayer[]
   tournaments TournamentPlayer[]
+  teams Team[]
+  tourTeams TourTeam[]
+}
+
+model Guild {
+  id BigInt @id
+  name String
+  createdAt DateTime @default(now())
+
+  // Relations
+  tournaments Tournament[]
+  roles Role[]
+}
+
+model Role {
+  id BigInt @id
+  name String
+  guildId BigInt
+  createdAt DateTime @default(now())
+
+  // Relations
+  guild Guild @relation(fields: [guildId], references: [id], onDelete: Cascade)
+}
+
+model Season {
+  id BigInt @id
+  name String
+  type String
+  createdAt DateTime @default(now())
+
+  // Relations
+  tournaments Tournament[]
+}
+
+model Team {
+  id BigInt @id
+  name String
+  captainId BigInt
+  region Region?
+  imgUrl String?
+  createdAt DateTime @default(now())
+
+ // Relations
+ tourTeams TourTeam[]
+  player Player @relation(fields: [captainId], references: [id], onDelete: Restrict )
+}
+
+model TourTeam {
+  tourId BigInt
+  teamId BigInt
+  joinId BigInt @unique
+  captainId BigInt
+  points Int
+  placement Int
+  confirmed TourCheckIn @default(NOT_CHECKED)
+  wins Int
+  loses Int
+  confirmedAt DateTime
+  createdAt DateTime @default(now())
+
+  // Relations
+  tourTeamPlayers TourTeamPlayer[]
+  player Player @relation(fields: [captainId], references: [id], onDelete: Restrict )
+  tournament Tournament @relation(fields: [tourId], references: [id], onDelete: Cascade )
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade )
+
+
+  @@unique([ tourId, teamId])
+}
+
+model TourTeamPlayer {
+  tourId BigInt
+  teamId BigInt
+  playerId BigInt
+  checkIn TourCheckIn @default(NOT_CHECKED)
+  buyIn Boolean?
+  createdAt DateTime @default(now())
+
+  @@unique([ tourId, teamId, playerId])
+
+  // Relations
+  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  tourTeam TourTeam @relation(fields: [tourId, teamId], references: [tourId, teamId], onDelete: Cascade)
 }
