@@ -29,4 +29,6 @@ client.on('ready', () => {
 });
 client.on('interactionCreate', interactionCreate);
 
+console.log('Webhook test');
+
 client.login(config.token);
